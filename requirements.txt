@@ -4,3 +4,5 @@ pymongo
 dnspython
 openpyxl
 phonenumbers
+requests
+python-dotenv
