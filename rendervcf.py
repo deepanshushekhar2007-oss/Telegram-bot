@@ -5,7 +5,6 @@ import asyncio
 import zipfile
 import mimetypes
 from phonenumbers import NumberParseException
-asyncio.set_event_loop(asyncio.new_event_loop())
 
 
 from telethon import TelegramClient, events, Button
