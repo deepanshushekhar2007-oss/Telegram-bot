@@ -6,3 +6,4 @@ openpyxl
 phonenumbers
 requests
 python-dotenv
+psutil
