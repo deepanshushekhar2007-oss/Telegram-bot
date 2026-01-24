@@ -7,3 +7,4 @@ phonenumbers
 requests
 python-dotenv
 psutil
+Pandas
