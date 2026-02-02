@@ -2063,67 +2063,73 @@ async def ghbackup_status(event):
         f"📝 Message:\n`{LAST_GH_BACKUP['message']}`"
     )        
                  
-            
-                        
-@client.on(events.NewMessage(pattern="/ban"))
+
+
+@client.on(events.NewMessage(pattern=r'^/ban(?:\s+(\d+))?$'))
 async def ban_user(event):
     if event.sender_id != ADMIN_ID:
         return
 
+    uid = event.pattern_match.group(1)
+
+    if not uid:
+        await event.reply("❌ Usage: /ban USER_ID")
+        return
+
+    uid = int(uid)
+
+    if uid in banned_users:
+        await event.reply("ℹ️ User is already banned.")
+        return
+
+    banned_users[uid] = True
+    save_banned()
+
+    # ✅ Admin confirmation
+    await event.reply(f"🚫 User `{uid}` banned successfully.")
+
+    # 🔔 Notify user
     try:
-        uid = event.raw_text.split()[1]
-
-        if uid in banned_users:
-            await event.reply("ℹ️ User is already banned.")
-            return
-
-        banned_users[uid] = True
-        save_banned()
-
-        # ✅ Admin confirmation
-        await event.reply(f"🚫 User `{uid}` banned successfully.")
-
-        # 🔔 Notify user
-        try:
-            await client.send_message(
-                int(uid),
-                "🚫 **You have been banned from using this bot.**"
-            )
-        except:
-            pass
-
+        await client.send_message(
+            uid,
+            "🚫 **You have been banned from using this bot.**"
+        )
     except:
-        await event.reply("❌ Usage: /ban USER_ID")            
-        
-@client.on(events.NewMessage(pattern="/unban"))
+        pass
+
+
+@client.on(events.NewMessage(pattern=r'^/unban(?:\s+(\d+))?$'))
 async def unban_user(event):
     if event.sender_id != ADMIN_ID:
         return
 
-    try:
-        uid = event.raw_text.split()[1]
+    uid = event.pattern_match.group(1)
 
-        if uid in banned_users:
-            banned_users.pop(uid)
-            save_banned()
-
-            # ✅ Admin confirmation
-            await event.reply(f"✅ User `{uid}` unbanned successfully.")
-
-            # 🔔 Notify user
-            try:
-                await client.send_message(
-                    int(uid),
-                    "✅ **You are unbanned now.**\n\nSend /start to use the bot again."
-                )
-            except:
-                pass
-        else:
-            await event.reply("ℹ️ User is not banned.")
-
-    except:
+    if not uid:
         await event.reply("❌ Usage: /unban USER_ID")
-    
+        return
+
+    uid = int(uid)
+
+    if uid not in banned_users:
+        await event.reply("ℹ️ User is not banned.")
+        return
+
+    banned_users.pop(uid)
+    save_banned()
+
+    # ✅ Admin confirmation
+    await event.reply(f"✅ User `{uid}` unbanned successfully.")
+
+    # 🔔 Notify user
+    try:
+        await client.send_message(
+            uid,
+            "✅ **You are unbanned now.**\n\nSend /start to use the bot again."
+        )
+    except:
+        pass
+        
 @client.on(events.NewMessage(pattern="/report"))
 async def export_users_full(event):
     if event.sender_id != ADMIN_ID:
