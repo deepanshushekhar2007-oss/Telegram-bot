@@ -33,28 +33,56 @@ LAST_GH_BACKUP = {
     "message": None
 }
 
+import subprocess
+import os
+
 def github_backup():
     try:
         if not GITHUB_TOKEN or not GITHUB_REPO:
             return "❌ GitHub env vars missing"
 
-        subprocess.run(["git", "config", "--global", "user.name", "SPIDY-BOT"], check=True)
-        subprocess.run(["git", "config", "--global", "user.email", "backup@spidy.bot"], check=True)
+        # 🔐 Git identity (LOCAL repo level – IMPORTANT)
+        subprocess.run(
+            ["git", "config", "user.name", "SPIDY-BOT"],
+            check=True
+        )
+        subprocess.run(
+            ["git", "config", "user.email", "backup@spidy.bot"],
+            check=True
+        )
 
+        # 🌍 Remote with token
         remote_url = f"https://{GITHUB_TOKEN}@github.com/{GITHUB_REPO}.git"
-        subprocess.run(["git", "remote", "set-url", "origin", remote_url], check=True)
+        subprocess.run(
+            ["git", "remote", "set-url", "origin", remote_url],
+            check=True
+        )
 
-        subprocess.run(["git", "add", "."], check=True)
+        # ➕ Add files
+        subprocess.run(["git", "add", "-A"], check=True)
 
+        # 🔍 Check changes
         status = subprocess.check_output(
             ["git", "status", "--porcelain"]
         ).decode().strip()
 
+        # 🧠 If NO changes → allow empty commit (VERY IMPORTANT)
         if not status:
-            return "ℹ️ No changes to backup"
+            subprocess.run(
+                ["git", "commit", "--allow-empty", "-m", "Manual admin backup"],
+                check=True
+            )
+        else:
+            subprocess.run(
+                ["git", "commit", "-m", "Manual admin backup"],
+                check=True
+            )
 
-        subprocess.run(["git", "commit", "-m", "Manual admin backup"], check=True)
-        subprocess.run(["git", "push", "origin", GITHUB_BRANCH], check=True)
+        # 🚀 Push
+        subprocess.run(
+            ["git", "push", "origin", GITHUB_BRANCH],
+            check=True
+        )
 
         return "✅ GitHub Backup Successful"
 
