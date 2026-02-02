@@ -23,9 +23,7 @@ import threading
 import subprocess
 
 # ================= GITHUB BACKUP CONFIG =================
-GITHUB_TOKEN = os.getenv("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")
-GITHUB_REPO = os.getenv("deepanshushekhar2007-oss/spidy-bot-backup")
-GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "main")
+
 
 LAST_GH_BACKUP = {
     "time": None,
@@ -33,21 +31,23 @@ LAST_GH_BACKUP = {
     "message": None
 }
 
-import subprocess
-import os
-
 def github_backup():
     try:
-        if not GITHUB_TOKEN or not GITHUB_REPO:
-            return "❌ GitHub env vars missing"
+        # ✅ ENV sahi tareeke se read
+        GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN")
+        GITHUB_REPO = os.environ.get("GITHUB_REPO")
+        GITHUB_BRANCH = os.environ.get("GITHUB_BRANCH", "main")
 
-        # 🔐 Git identity (LOCAL repo level – IMPORTANT)
+        if not GITHUB_TOKEN or not GITHUB_REPO:
+            return "❌ GitHub ENV variables not set"
+
+        # 🔐 Git identity
         subprocess.run(
-            ["git", "config", "user.name", "SPIDY-BOT"],
+            ["git", "config", "--global", "user.name", "SPIDY-BOT"],
             check=True
         )
         subprocess.run(
-            ["git", "config", "user.email", "backup@spidy.bot"],
+            ["git", "config", "--global", "user.email", "backup@spidy.bot"],
             check=True
         )
 
@@ -66,7 +66,7 @@ def github_backup():
             ["git", "status", "--porcelain"]
         ).decode().strip()
 
-        # 🧠 If NO changes → allow empty commit (VERY IMPORTANT)
+        # 🧠 Commit
         if not status:
             subprocess.run(
                 ["git", "commit", "--allow-empty", "-m", "Manual admin backup"],
