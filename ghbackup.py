@@ -960,7 +960,7 @@ async def access_off(event):
 @client.on(events.NewMessage(func=lambda e: not e.raw_text or not e.raw_text.startswith("/")))
 async def handler(event):
     if event.sender_id in banned_users:
-    return
+        return
     uid = event.sender_id
     chat = event.chat_id
 
