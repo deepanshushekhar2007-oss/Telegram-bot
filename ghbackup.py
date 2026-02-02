@@ -23,8 +23,8 @@ import threading
 import subprocess
 
 # ================= GITHUB BACKUP CONFIG =================
-GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
-GITHUB_REPO = os.getenv("GITHUB_REPO")
+GITHUB_TOKEN = os.getenv("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")
+GITHUB_REPO = os.getenv("deepanshushekhar2007-oss/spidy-bot-backup")
 GITHUB_BRANCH = os.getenv("GITHUB_BRANCH", "main")
 
 LAST_GH_BACKUP = {
