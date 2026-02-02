@@ -32,6 +32,34 @@ LAST_GH_BACKUP = {
     "status": None,
     "message": None
 }
+
+def github_backup():
+    try:
+        if not GITHUB_TOKEN or not GITHUB_REPO:
+            return "❌ GitHub env vars missing"
+
+        subprocess.run(["git", "config", "--global", "user.name", "SPIDY-BOT"], check=True)
+        subprocess.run(["git", "config", "--global", "user.email", "backup@spidy.bot"], check=True)
+
+        remote_url = f"https://{GITHUB_TOKEN}@github.com/{GITHUB_REPO}.git"
+        subprocess.run(["git", "remote", "set-url", "origin", remote_url], check=True)
+
+        subprocess.run(["git", "add", "."], check=True)
+
+        status = subprocess.check_output(
+            ["git", "status", "--porcelain"]
+        ).decode().strip()
+
+        if not status:
+            return "ℹ️ No changes to backup"
+
+        subprocess.run(["git", "commit", "-m", "Manual admin backup"], check=True)
+        subprocess.run(["git", "push", "origin", GITHUB_BRANCH], check=True)
+
+        return "✅ GitHub Backup Successful"
+
+    except subprocess.CalledProcessError as e:
+        return f"❌ GitHub Backup Failed\n{e}"
 # ================= FLASK KEEP ALIVE =================
 app = Flask(__name__)
 
