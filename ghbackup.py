@@ -212,7 +212,7 @@ subscriptions = {}   # user_id -> expiry datetime
 user_state = {}
 user_files = {}
 user_data = {}
-
+banned_users = {}   # dict
 
 
 SUB_FILE = "subscriptions.json"
