@@ -1021,9 +1021,9 @@ async def handler(event):
 
         src = user_files[uid][0]
 
-            file_obj = src["data"]
-            file_obj.seek(0)
-            data = file_obj.read().decode(errors="ignore")
+        file_obj = src["data"]
+        file_obj.seek(0)
+        data = file_obj.read().decode(errors="ignore")
 
     # 🔒 Preserve original VCARD exactly
         cards = [c for c in data.split("END:VCARD") if "BEGIN:VCARD" in c]
