@@ -290,6 +290,12 @@ def init_user(uid):
     user_data.setdefault(uid, {})
 
 def cleanup(uid):
+    for f in user_files.get(uid, []):
+        try:
+            if os.path.exists(f):
+                os.remove(f)
+        except:
+            pass
     user_files[uid] = []
     user_state[uid] = "MENU"
     user_data[uid] = {}
@@ -932,22 +938,15 @@ async def handler(event):
     state = user_state[uid]
 
     # 📤 FILE UPLOAD
-    from io import BytesIO   # ⬅️ top me ek baar import hona chahiye
-
-# 📤 FILE UPLOAD (NO DISK SAVE)
     if event.file:
-        file_buffer = BytesIO()
-        await event.download_media(file=file_buffer)
-        file_buffer.seek(0)
+        original_name = event.file.name
+        file_path = original_name  # 🔥 SAME NAME AS USER FILE
 
-        user_files[uid].append({
-            "name": event.file.name,
-            "data": file_buffer
-        })
-
-        await event.reply("📥 File received (not saved)\n➡️ Send /done")
+        await event.download_media(file=file_path)
+        user_files[uid].append(file_path)
+        await event.reply("📥 File received\n➡️ Send /done")
         return
- 
+
     # 📝 TEXT HANDLING (states continue...)
      
     # ---------- EDIT VCF ----------
@@ -1021,9 +1020,8 @@ async def handler(event):
 
         src = user_files[uid][0]
 
-        file_obj = src["data"]
-        file_obj.seek(0)
-        data = file_obj.read().decode(errors="ignore")
+        with open(src, "r", errors="ignore") as r:
+            data = r.read()
 
     # 🔒 Preserve original VCARD exactly
         cards = [c for c in data.split("END:VCARD") if "BEGIN:VCARD" in c]
@@ -1085,9 +1083,8 @@ async def handler(event):
         src = user_files[uid][0]
         out = "added_numbers.vcf"
 
-        file_obj = src["data"]     # BytesIO object
-        file_obj.seek(0)
-        data = file_obj.read().decode(errors="ignore")
+        with open(src, "r", errors="ignore") as r:
+            data = r.read()
 
         with open(out, "w") as w:
             w.write(data)
@@ -1120,9 +1117,8 @@ async def handler(event):
 
         src = user_files[uid][0]
 
-        file_obj = src["data"]
-        file_obj.seek(0)
-        data = file_obj.read().decode(errors="ignore")
+        with open(src, "r", errors="ignore") as r:
+            data = r.read()
   
     # 🧠 Split WITHOUT changing content
         cards = [c for c in data.split("END:VCARD") if "BEGIN:VCARD" in c]
@@ -1254,7 +1250,15 @@ async def handler(event):
         
         
 
-    
+    save_dir = "user_uploads"
+    os.makedirs(save_dir, exist_ok=True)
+
+    file_name = event.file.name
+    file_path = os.path.join(save_dir, file_name)
+
+    await event.download_media(file_path)
+
+    user_files[uid].append(file_path)   # ✅ FULL PATH
          
 # ================= BUTTONS =================
 @client.on(events.CallbackQuery)
