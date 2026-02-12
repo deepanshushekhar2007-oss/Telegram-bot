@@ -1568,7 +1568,7 @@ async def buttons(event):
         await show_menu(chat)
         return
         
-        if data == "split_custom_yes":
+     if data == "split_custom_yes":
         user_state[uid] = "WAIT_SPLIT_BASE_NAME"
         await event.edit("📁 Send base FILE name",     buttons=None)
         return
