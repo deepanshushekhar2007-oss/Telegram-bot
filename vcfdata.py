@@ -176,8 +176,7 @@ WAIT_BUTTON_BROADCAST = "WAIT_BUTTON_BROADCAST"
 
 # group & channel ids
 GROUP_CHANNEL_IDS = [
-    -1001234567890,
-    -1009876543210
+    -1003400610239
 ]
 
 # mongodb users collection (agar already hai to ignore)
