@@ -403,7 +403,6 @@ async def notify_admin(msg):
     await client.send_message(ADMIN_ID, msg)
 
 async def show_menu(chat):
-async def show_menu(chat):
     await client.send_message(
         chat,
         "╔══════════════════╗\n"
