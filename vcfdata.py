@@ -404,25 +404,23 @@ async def notify_admin(msg):
 
 async def show_menu(chat):
 async def show_menu(chat):
-    text = (
+    await client.send_message(
+        chat,
         "╔══════════════════╗\n"
-        "   ✨ 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗩𝗖𝗙 𝗠𝗔𝗡𝗔𝗚𝗘𝗥\n"
+        "   ✨ 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗦𝗣𝗜𝗗𝗬 𝗩𝗖𝗙 𝗘𝗗𝗜𝗧𝗢𝗥\n"
         "╚══════════════════╝\n\n"
         "📂 Please select an option below 👇\n"
-        "━━━━━━━━━━━━━━━━━━━━━━"
-    )
-
-    buttons = [
-        [
-            Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit"),
-            Button.inline("🔪 SPLIT VCF", b"split")
-        ],
-        [
-            Button.inline("🧪 ADVANCE VCF EDITOR", b"advance")
+        "━━━━━━━━━━━━━━━━━━━━━━",
+        buttons=[
+            [
+                Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit"),
+                Button.inline("🔪 SPLIT VCF", b"split")
+            ],
+            [
+                Button.inline("🧪 ADVANCE VCF EDITOR", b"advance")
+            ]
         ]
-    ]
-
-    await client.send_message(chat, text, buttons=buttons)
+)
 
 
 from telethon.tl.functions.channels import GetParticipantRequest
