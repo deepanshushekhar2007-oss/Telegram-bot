@@ -405,9 +405,7 @@ async def notify_admin(msg):
 async def show_menu(chat):
     await client.send_message(
         chat,
-        "✨ Welcome to SPIDY VCF EDITOR ✨
-━━━━━━━━━━━━━━━━━━━━━━
-Please select an option below 👇",
+        "✨ Welcome to SPIDY VCF EDITOR ✨━━━━━━━━━━━━━━━━━━━━━━Please select an option below 👇",
         buttons=[
             [Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit")],
             [Button.inline("🔪 SPLIT VCF", b"split")],
