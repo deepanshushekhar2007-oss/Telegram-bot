@@ -403,17 +403,26 @@ async def notify_admin(msg):
     await client.send_message(ADMIN_ID, msg)
 
 async def show_menu(chat):
-    await client.send_message(
-        chat,
-        "✨ Welcome to SPIDY VCF EDITOR ✨\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        "Please select an option below 👇",
-        buttons=[
-            [Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit")],
-            [Button.inline("🔪 SPLIT VCF", b"split")],
-            [Button.inline("🧪 ADVANCE VCF EDITOR", b"advance")]
-        ]
+async def show_menu(chat):
+    text = (
+        "╔══════════════════╗\n"
+        "   ✨ 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 𝗩𝗖𝗙 𝗠𝗔𝗡𝗔𝗚𝗘𝗥\n"
+        "╚══════════════════╝\n\n"
+        "📂 Please select an option below 👇\n"
+        "━━━━━━━━━━━━━━━━━━━━━━"
     )
+
+    buttons = [
+        [
+            Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit"),
+            Button.inline("🔪 SPLIT VCF", b"split")
+        ],
+        [
+            Button.inline("🧪 ADVANCE VCF EDITOR", b"advance")
+        ]
+    ]
+
+    await client.send_message(chat, text, buttons=buttons)
 
 
 from telethon.tl.functions.channels import GetParticipantRequest
