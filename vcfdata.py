@@ -1959,7 +1959,7 @@ async def access(event):
             f"⏳ Duration     : {days} Days\n"
             f"🔓 Features     : Fully Unlocked\n\n"
             f"📂 Send /start to access your dashboard."
-        )"
+        
         )
 
     except:
