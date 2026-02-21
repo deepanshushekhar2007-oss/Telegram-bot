@@ -366,9 +366,7 @@ def cleanup(uid):
 
 # ⬇️ TYPE IT HERE (NO BLANK LINE ABOVE def)
 def group_allowed(event):
-    if event.is_private:
-        return True
-    return event.chat_id in group_access
+    return True
     
 def is_subscribed(uid):
     if free_mode:  # <-- FREE MODE IGNORES SUBSCRIPTIONS
