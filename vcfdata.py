@@ -1081,34 +1081,34 @@ async def handler(event):
 # ===============================
     if user_state.get(uid) == WAIT_AGENT_FILE:
 
-    if not event.file:
-        await event.reply("📂 Please send TXT file")
+        if not event.file:
+            await event.reply("📂 Please send TXT file")
+            return
+
+        file_path = await event.download_media()
+        file_name = os.path.basename(file_path)
+
+        numbers = extract_all_numbers(file_path)
+        total = len(numbers)
+
+        if total == 0:
+            return await event.reply("❌ No numbers found")
+
+        agent_data[uid] = {
+            "numbers": numbers,
+            "total": total
+        }
+
+        user_state[uid] = WAIT_AGENT_INPUT
+
+        await event.reply(
+            f"File '{file_name}' uploaded\n"
+            f"Total contacts: {total}\n\n"
+            "Reply format:\n"
+            "<contact name>,<vcf file name>,<contacts per file>,<starting number>\n\n"
+            "Example:\nSPIDY,VIP,200,1"
+        )
         return
-
-    file_path = await event.download_media()
-    file_name = os.path.basename(file_path)
-
-    numbers = extract_all_numbers(file_path)
-    total = len(numbers)
-
-    if total == 0:
-        return await event.reply("❌ No numbers found")
-
-    agent_data[uid] = {
-        "numbers": numbers,
-        "total": total
-    }
-
-    user_state[uid] = WAIT_AGENT_INPUT
-
-    await event.reply(
-        f"File '{file_name}' uploaded\n"
-        f"Total contacts: {total}\n\n"
-        "Reply format:\n"
-        "<contact name>,<vcf file name>,<contacts per file>,<starting number>\n\n"
-        "Example:\nSPIDY,VIP,200,1"
-    )
-    return
 
 
 # ===============================
