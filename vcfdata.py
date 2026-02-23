@@ -1079,7 +1079,7 @@ async def handler(event):
 # ===============================
 # 🤖 AGENT FILE RECEIVE (FIRST PRIORITY)
 # ===============================
-if user_state.get(uid) == WAIT_AGENT_FILE:
+    if user_state.get(uid) == WAIT_AGENT_FILE:
 
     if not event.file:
         await event.reply("📂 Please send TXT file")
