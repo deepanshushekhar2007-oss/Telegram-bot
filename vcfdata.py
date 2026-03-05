@@ -69,8 +69,8 @@ def run_flask():
 # ================= CONFIG =================
 
 
-api_id = int(os.getenv("API_ID"))
-api_hash = os.getenv("API_HASH")
+api_id = 34958210
+api_hash = "6923cd2c34591c8e26b30ade39c7518b"        # PUT API HASH
 bot_token = os.getenv("BOT_TOKEN")
 ADMIN_ID = int(os.getenv("ADMIN_ID"))
 
