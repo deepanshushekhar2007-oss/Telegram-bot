@@ -1,3 +1,4 @@
+import requests
 import phonenumbers
 from phonenumbers import geocoder
 import asyncio
@@ -84,6 +85,23 @@ client.start(bot_token=bot_token)
 
 free_mode = get_config("free_mode", False)
 force_sub_enabled = get_config("force_sub", False)
+
+# ================= STYLED BUTTON HELPERS =================
+def send_styled_msg(chat_id, text, rows, parse_mode="HTML"):
+    api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {"chat_id": chat_id, "text": text, "parse_mode": parse_mode, "reply_markup": {"inline_keyboard": rows}}
+    requests.post(api_url, json=payload)
+
+def edit_styled_msg(chat_id, message_id, text, rows, parse_mode="HTML"):
+    api_url = f"https://api.telegram.org/bot{bot_token}/editMessageText"
+    payload = {"chat_id": chat_id, "message_id": message_id, "text": text, "parse_mode": parse_mode, "reply_markup": {"inline_keyboard": rows}}
+    requests.post(api_url, json=payload)
+
+def reply_styled_msg(chat_id, reply_to_msg_id, text, rows, parse_mode="HTML"):
+    api_url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+    payload = {"chat_id": chat_id, "reply_to_message_id": reply_to_msg_id, "text": text, "parse_mode": parse_mode, "reply_markup": {"inline_keyboard": rows}}
+    requests.post(api_url, json=payload)
+
 # ================= ADMIN COMMANDS =================
 @client.on(events.NewMessage(pattern="/admin"))
 async def admin_panel(event):
@@ -462,21 +480,13 @@ async def show_menu(chat):
             if custom_name:
                 bot_name = custom_name
 
-    await client.send_message(
+    send_styled_msg(
         chat,
-        f"╔══════════════════╗\n"
-        f"   ✨ 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 {to_bold(bot_name)}\n"
-        f"╚══════════════════╝\n\n"
-        f"📂 Please select an option below 👇\n"
-        f"━━━━━━━━━━━━━━━━━━━━━━",
-        buttons=[
-            [
-                Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit"),
-                Button.inline("🔪 SPLIT VCF", b"split")
-            ],
-            [
-                Button.inline("🧪 ADVANCE VCF EDITOR", b"advance")
-            ]
+        f"╔══════════════════╗\n ✨ 𝗪𝗘𝗟𝗖𝗢𝗠𝗘 𝗧𝗢 {to_bold(bot_name)}\n╚══════════════════╝\n\n📂 Please select an option below 👇\n━━━━━━━━━━━━━━━━━━━━━━",
+        [
+            [{"text": "🧑🏻‍🔧 EDIT VCF", "callback_data": "edit", "style": "primary"},
+             {"text": "🔪 SPLIT VCF", "callback_data": "split", "style": "primary"}],
+            [{"text": "🧪 ADVANCE VCF EDITOR", "callback_data": "advance", "style": "success"}]
         ]
     )
     
@@ -861,15 +871,13 @@ async def start(event):
     if force_sub_enabled:
         joined = await is_user_joined(event)
         if not joined:
-            await event.reply(
-                "⚠️ **Access Required**\n\n"
-                "Joining our official channel is mandatory to use this service.\n\n"
-                "After joining, tap **I Joined** below to continue.",
-                buttons=[
-                    [Button.url("🔔 Join Channel", f"https://t.me/{FORCE_SUB_CHANNEL}")],
-                    [Button.inline("✅ I Joined", b"check_join")]
-                ],
-                link_preview=False
+            reply_styled_msg(
+                event.chat_id, event.id,
+                "⚠️ <b>Access Required</b>\n\nJoining our official channel is mandatory to use this service.\n\nAfter joining, tap <b>I Joined</b> below to continue.",
+                [
+                    [{"text": "🔔 Join Channel", "url": f"https://t.me/{FORCE_SUB_CHANNEL}"}],
+                    [{"text": "✅ I Joined", "callback_data": "check_join", "style": "success"}]
+                ]
             )
             return
 
@@ -1115,15 +1123,12 @@ async def handler(event):
     if force_sub_enabled and not is_subscribed(uid):
         joined = await is_user_joined(event)
         if not joined:
-            await event.reply(
-                "⚠️ **Access Required**\n\n"
-                "Please join our official channel to continue.",
-                buttons=[
-                    [Button.url(
-                        "🔔 Join Now",
-                        f"https://t.me/{FORCE_SUB_CHANNEL.replace('@','')}"
-                    )],
-                    [Button.inline("✅ I Joined", b"check_join")]
+            reply_styled_msg(
+                event.chat_id, event.id,
+                "⚠️ <b>Access Required</b>\n\nPlease join our official channel to continue.",
+                [
+                    [{"text": "🔔 Join Now", "url": f"https://t.me/{FORCE_SUB_CHANNEL.replace('@','')}"}],
+                    [{"text": "✅ I Joined", "callback_data": "check_join", "style": "success"}]
                 ]
             )
             return
@@ -1396,13 +1401,14 @@ async def handler(event):
 
         user_data[uid]["split_parts"] = parts
 
-        await event.reply(
-            "✨ Custom file & contact name use karna hai?",
-            buttons=[
-                [Button.inline("✅ Yes", b"split_custom_yes")],
-                [Button.inline("❌ No", b"split_custom_no")]
-        ]
-    )
+        reply_styled_msg(
+                event.chat_id, event.id,
+                "✨ Custom file & contact name use karna hai?",
+                [
+                    [{"text": "✅ Yes", "callback_data": "split_custom_yes", "style": "success"}],
+                    [{"text": "❌ No", "callback_data": "split_custom_no", "style": "danger"}]
+                ]
+        )
 
         user_state[uid] = WAIT_SPLIT_CUSTOM_CONFIRM
         return
@@ -1536,7 +1542,8 @@ async def handler(event):
         }
 
     # 📊 REPORT + BUTTONS
-        await event.reply(
+        reply_styled_msg(
+            event.chat_id, event.id,
             "📊 AGENT MODE REPORT\n\n"
             f"👤 Base Contact Name: {contact_name}\n"
             f"📁 Base File Name: {vcf_name}\n"
@@ -1548,9 +1555,9 @@ async def handler(event):
             f"{contact_name}{start:03}\n"
             f"{contact_name}{start+1:03}\n"
             f"{contact_name}{start+2:03}",
-            buttons=[
-                [Button.inline("✅ CONFIRM", b"agent_confirm")],
-                [Button.inline("❌ CANCEL", b"agent_cancel")]
+            [
+                [{"text": "✅ CONFIRM", "callback_data": "agent_confirm", "style": "success"}],
+                [{"text": "❌ CANCEL", "callback_data": "agent_cancel", "style": "danger"}]
             ]
         )
 
@@ -1769,22 +1776,19 @@ async def buttons(event):
     # ---------- ADVANCE MENU ----------
 
     if data == "advance":
-        await event.edit(
-        "╔══════════════════╗\n"
-        "   🧪 𝗔𝗗𝗩𝗔𝗡𝗖𝗘 𝗩𝗖𝗙 𝗘𝗗𝗜𝗧𝗢𝗥\n"
-        "╚══════════════════╝\n\n"
-        "⚙️ 𝗦𝗘𝗟𝗘𝗖𝗧 𝗬𝗢𝗨𝗥 𝗧𝗔𝗦𝗞 👇\n"
-        "━━━━━━━━━━━━━━━━━━━━━━",
-            buttons=[
-                [Button.inline("🔗 Merge VCF", b"merge")],
-                [Button.inline("➕ Add Numbers", b"addnum")],
-                [Button.inline("📇 Make VCF", b"makevcf")],
-                [Button.inline("🪓 Split VCF (Parts)", b"splitpart")],
-                [Button.inline("👮‍♂️ Admin + ⚓ Navy VCF", b"admin_navy")],
-                [Button.inline("🔍 Analyze File", b"analyze_any")],
-                [Button.inline("🔄 Universal Converter", b"converter")],
-                [Button.inline("🤖 Agent Mode", b"agent_mode")],
-                [Button.inline("⬅️ Back", b"back_main")]
+        edit_styled_msg(
+            event.chat_id, event.message_id,
+            "╔══════════════════╗\n   🧪 𝗔𝗗𝗩𝗔𝗡𝗖𝗘 𝗩𝗖𝗙 𝗘𝗗𝗜𝗧𝗢𝗥\n╚══════════════════╝\n\n⚙️ 𝗦𝗘𝗟𝗘𝗖𝗧 𝗬𝗢𝗨𝗥 𝗧𝗔𝗦𝗞 👇\n━━━━━━━━━━━━━━━━━━━━━━",
+            [
+                [{"text": "🔗 Merge VCF", "callback_data": "merge", "style": "primary"}],
+                [{"text": "➕ Add Numbers", "callback_data": "addnum", "style": "primary"}],
+                [{"text": "📇 Make VCF", "callback_data": "makevcf", "style": "primary"}],
+                [{"text": "🪓 Split VCF (Parts)", "callback_data": "splitpart", "style": "primary"}],
+                [{"text": "👮‍♂️ Admin + ⚓ Navy VCF", "callback_data": "admin_navy", "style": "primary"}],
+                [{"text": "🔍 Analyze File", "callback_data": "analyze_any", "style": "primary"}],
+                [{"text": "🔄 Universal Converter", "callback_data": "converter", "style": "primary"}],
+                [{"text": "🤖 Agent Mode", "callback_data": "agent_mode", "style": "primary"}],
+                [{"text": "⬅️ Back", "callback_data": "back_main", "style": "danger"}]
             ]
         )
         return
@@ -1958,19 +1962,15 @@ async def buttons(event):
         cleanup(uid)
 
     # 4️⃣ NEW MENU MESSAGE AT BOTTOM
-        await client.send_message(
-            event.chat_id,
-    "╔══════════════════╗\n"
-    "   ✅ 𝗧𝗔𝗦𝗞 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗\n"
-    "╚══════════════════╝\n\n"
-    "⚙️ 𝗪𝗛𝗔𝗧 𝗪𝗢𝗨𝗟𝗗 𝗬𝗢𝗨 𝗟𝗜𝗞𝗘 𝗧𝗢 𝗗𝗢 𝗡𝗘𝗫𝗧? 👇\n"
-    "━━━━━━━━━━━━━━━━━━━━━━",
-            buttons=[
-                [Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit")],
-                [Button.inline("🔪 SPLIT VCF", b"split")],
-                [Button.inline("🧪 ADVANCE VCF EDITOR", b"advance")]
-            ]
-        )
+        send_styled_msg(
+        event.chat_id,
+        "╔══════════════════╗\n   ✅ 𝗧𝗔𝗦𝗞 𝗖𝗢𝗠𝗣𝗟𝗘𝗧𝗘𝗗\n╚══════════════════╝\n\n⚙️ 𝗪𝗛𝗔𝗧 𝗪𝗢𝗨𝗟𝗗 𝗬𝗢𝗨 𝗟𝗜𝗞𝗘 𝗧𝗢 𝗗𝗢 𝗡𝗘𝗫𝗧? 👇\n━━━━━━━━━━━━━━━━━━━━━━",
+        [
+            [{"text": "🧑🏻‍🔧 EDIT VCF", "callback_data": "edit", "style": "primary"}],
+            [{"text": "🔪 SPLIT VCF", "callback_data": "split", "style": "primary"}],
+            [{"text": "🧪 ADVANCE VCF EDITOR", "callback_data": "advance", "style": "success"}]
+        ]
+    )
         return
         
    
@@ -2135,18 +2135,15 @@ async def buttons(event):
     # ---------- BACK (ONLY FROM ADVANCE) ----------
     if data == "back_main":
         cleanup(uid)
-        await event.edit(
-        "╔══════════════════╗\n"
-        "   ✨ 𝗠𝗔𝗜𝗡 𝗠𝗘𝗡𝗨\n"
-        "╚══════════════════╝\n\n"
-        "⚙️ 𝗦𝗘𝗟𝗘𝗖𝗧 𝗬𝗢𝗨𝗥 𝗧𝗔𝗦𝗞 👇\n"
-        "━━━━━━━━━━━━━━━━━━━━━━",
-            buttons=[
-                [Button.inline("🧑🏻‍🔧 EDIT VCF", b"edit")],
-                [Button.inline("🔪 SPLIT VCF", b"split")],
-                [Button.inline("🧪 ADVANCE VCF EDITOR", b"advance")]
-            ]
-        )
+        edit_styled_msg(
+        event.chat_id, event.message_id,
+        "╔══════════════════╗\n   ✨ 𝗠𝗔𝗜𝗡 𝗠𝗘𝗡𝗨\n╚══════════════════╝\n\n⚙️ 𝗦𝗘𝗟𝗘𝗖𝗧 𝗬𝗢𝗨𝗥 𝗧𝗔𝗦𝗞 👇\n━━━━━━━━━━━━━━━━━━━━━━",
+        [
+            [{"text": "🧑🏻‍🔧 EDIT VCF", "callback_data": "edit", "style": "primary"}],
+            [{"text": "🔪 SPLIT VCF", "callback_data": "split", "style": "primary"}],
+            [{"text": "🧪 ADVANCE VCF EDITOR", "callback_data": "advance", "style": "success"}]
+        ]
+    )
         return
         
         
@@ -2203,13 +2200,14 @@ async def done_handler(event):
 
         user_state[uid] = WAIT_CONVERT_TARGET
 
-        await event.reply(
-            "📂 **Convert To**",
-            buttons=[
-                [Button.inline("📇 VCF", b"cv_vcf")],
-                [Button.inline("📄 TXT", b"cv_txt")],
-                [Button.inline("📊 CSV", b"cv_csv")],
-                [Button.inline("📗 XLSX", b"cv_xlsx")],
+        reply_styled_msg(
+            event.chat_id, event.id,
+            "📂 <b>Convert To</b>",
+            [
+                [{"text": "📇 VCF", "callback_data": "cv_vcf", "style": "primary"}],
+                [{"text": "📄 TXT", "callback_data": "cv_txt", "style": "primary"}],
+                [{"text": "📊 CSV", "callback_data": "cv_csv", "style": "primary"}],
+                [{"text": "📗 XLSX", "callback_data": "cv_xlsx", "style": "primary"}]
             ]
         )
         return
@@ -2279,7 +2277,6 @@ async def done_handler(event):
         await show_menu(event.chat_id)
         return
         
-# ================= ADMIN =================
 # ================= ADMIN COMMANDS =================
 @client.on(events.NewMessage(pattern="/admin"))
 async def admin_panel(event):
